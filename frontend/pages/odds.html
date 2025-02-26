@@ -1,0 +1,234 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Leave a Review - BookHub</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+
+        .navbar {
+            background-color: #1e1e1e;
+            padding: 10px 0;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            display: inline-block;
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #ff9800;
+            color: white;
+            border-radius: 5px;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        select, textarea, button {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .rating-container {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            font-size: 24px;
+            cursor: pointer;
+            margin: 10px 0;
+        }
+
+        .star {
+            color: gray;
+            transition: transform 0.3s ease, color 0.3s ease, scale 0.3s ease;
+        }
+
+        .star:hover {
+            transform: scale(1.3);
+            color: gold;
+        }
+
+        .star.active {
+            color: gold;
+            transform: scale(1.1);
+        }
+
+        button {
+            background-color: #ff9800;
+            color: white;
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #e68900;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="book.html">Books</a>
+        <a href="profile.html">Profile</a>
+        <a href="odds.html">Review</a>
+        <a href="cart.html">🛒 Cart</a>
+    </div>
+
+    <div class="container">
+        <h1>Leave a Review 📢</h1>
+        <form id="review-form">
+            <label for="book-name">Choose a Book:</label>
+            <select id="book-name" required>
+                <option value="">Loading books...</option>
+            </select>
+
+            <label>Rate the Book:</label>
+            <div class="rating-container">
+                <span class="star" data-value="1">⭐</span>
+                <span class="star" data-value="2">⭐</span>
+                <span class="star" data-value="3">⭐</span>
+                <span class="star" data-value="4">⭐</span>
+                <span class="star" data-value="5">⭐</span>
+            </div>
+            <input type="hidden" id="rating" value="5">
+
+            <label for="review-text">Your Feedback:</label>
+            <textarea id="review-text" rows="4" required></textarea>
+
+            <button type="submit">Submit Review</button>
+        </form>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("You need to log in to leave a review.");
+                window.location.href = "profile.html";
+                return;
+            }
+
+            // ⭐ Load books into the dropdown
+            try {
+                const response = await fetch("http://localhost:8080/api/books", {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (!response.ok) throw new Error("Failed to load books.");
+
+                const books = await response.json();
+                const bookDropdown = document.getElementById("book-name");
+                bookDropdown.innerHTML = '<option value="">Select a book...</option>';
+
+                books.forEach(book => {
+                    const option = document.createElement("option");
+                    option.value = book.id;
+                    option.textContent = book.title;
+                    bookDropdown.appendChild(option);
+                });
+            } catch (error) {
+                console.error("Error loading books:", error);
+                document.getElementById("book-name").innerHTML = '<option value="">Error loading books</option>';
+            }
+
+            // ⭐ Star rating system
+            const stars = document.querySelectorAll(".star");
+            const ratingInput = document.getElementById("rating");
+            let selectedRating = parseInt(ratingInput.value) || 5;
+
+            function updateStars(value) {
+                stars.forEach(star => {
+                    star.classList.toggle("active", parseInt(star.dataset.value) <= value);
+                });
+            }
+
+            stars.forEach(star => {
+                star.addEventListener("click", () => {
+                    selectedRating = parseInt(star.dataset.value);
+                    ratingInput.value = selectedRating;
+                    updateStars(selectedRating);
+
+                    // Alert to show the selected rating
+                    alert(`You rated this book: ${selectedRating} stars`);
+                });
+
+                star.addEventListener("mouseover", () => updateStars(parseInt(star.dataset.value)));
+                star.addEventListener("mouseout", () => updateStars(selectedRating));
+            });
+
+            updateStars(selectedRating);
+
+            // Submit review
+            document.getElementById("review-form").addEventListener("submit", async (event) => {
+                event.preventDefault();
+
+                const bookId = parseInt(document.getElementById("book-name").value, 10);
+                const reviewText = document.getElementById("review-text").value;
+                const rating = parseInt(ratingInput.value, 10);
+
+                if (!bookId) {
+                    alert("Please select a book.");
+                    return;
+                }
+
+                if (isNaN(rating) || rating < 1 || rating > 5) {
+                    alert("Rating must be between 1 and 5.");
+                    return;
+                }
+
+                try {
+                    const response = await fetch("http://localhost:8080/api/user/reviews", {
+                        method: "POST",
+                        headers: {
+                            "Authorization": `Bearer ${token}`,
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({
+                            book_id: bookId,
+                            rating: rating,
+                            text: reviewText
+                        })
+                    });
+
+                    const responseData = await response.json();
+                    if (!response.ok) {
+                        console.error("API Error Response:", responseData);
+                        throw new Error(responseData.error || "Failed to submit review.");
+                    }
+                    alert("Review submitted successfully!");
+                    window.location.reload();
+                } catch (error) {
+                    console.error("Error submitting review:", error);
+                    alert("Error submitting review. Please try again.");
+                }
+            });
+        });
+    </script>
+
+</body>
+</html>

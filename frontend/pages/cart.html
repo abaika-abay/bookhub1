@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Shopping Cart - BookHub</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            text-align: center;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1e1e1e;
+            padding: 10px 0;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            display: inline-block;
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #ff9800;
+            color: white;
+            border-radius: 5px;
+        }
+
+        /* Cart Container */
+        .cart-container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: left;
+        }
+
+        h1 {
+            font-size: 26px;
+            margin-bottom: 15px;
+            text-align: center;
+        }
+
+        /* Cart List */
+        .cart-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .cart-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .book-title {
+            flex-grow: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis; /* Long text will turn into ... */
+            max-width: 200px;
+            font-weight: bold;
+        }
+
+        /* Quantity Controls */
+        .quantity-controls {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .quantity-btn {
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            min-width: 40px;
+            text-align: center;
+        }
+
+        .quantity-btn:hover {
+            background-color: #e68900;
+        }
+
+        .delete-btn {
+            background-color: red;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            font-size: 14px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            margin-left: 10px;
+        }
+
+        .delete-btn:hover {
+            background-color: darkred;
+        }
+
+        /* Total Price */
+        .total-container {
+            margin-top: 20px;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .cart-container {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+        .checkout-btn {
+        width: 100%;
+        padding: 12px;
+        background-color: #28a745;
+        color: white;
+        border: none;
+        font-size: 16px;
+        font-weight: bold;
+        border-radius: 5px;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: 0.3s;
+        }
+
+        .checkout-btn:hover {
+        background-color: #218838;
+        }   
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="book.html">Books</a>
+        <a href="profile.html">Profile</a>
+        <a href="odds.html">Review</a>
+        <a href="cart.html">🛒 Cart</a>
+    </div>
+
+    <!-- Cart Section -->
+    <div class="cart-container">
+        <h1>Your Shopping Cart 🛒</h1>
+        <ul id="cart-list" class="cart-list"></ul>
+        <div class="total-container">Total: <span id="total-price">$0.00</span></div>
+        <button class="checkout-btn" onclick="checkoutCart()">Checkout</button>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+    const user = JSON.parse(localStorage.getItem("loggedInUser"));
+});
+
+        document.addEventListener("DOMContentLoaded", function () {
+            fetchCartItems();
+        });
+
+        function fetchCartItems() {
+            const token = localStorage.getItem("token");
+            if (!token) {
+                alert("Please log in to view your cart.");
+                return;
+            }
+
+            fetch("http://localhost:8080/api/cart", {
+                method: "GET",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            .then(response => response.json())
+            .then(cartItems => {
+                const cartList = document.getElementById("cart-list");
+                cartList.innerHTML = "";
+                let totalPrice = 0;
+
+                cartItems.forEach(item => {
+                    const li = document.createElement("li");
+                    li.classList.add("cart-item");
+                    li.setAttribute("data-book-id", item.book.id);
+
+                    // Title & Price
+                    const bookTitle = document.createElement("span");
+                    bookTitle.classList.add("book-title");
+                    bookTitle.textContent = `${item.book.title} ($${item.book.price})`;
+
+                    // Quantity Controls
+                    const quantityControls = document.createElement("div");
+                    quantityControls.classList.add("quantity-controls");
+
+                    const decreaseBtn = document.createElement("button");
+                    decreaseBtn.classList.add("quantity-btn");
+                    decreaseBtn.textContent = "−";
+                    decreaseBtn.onclick = () => updateQuantity(item.book.id, item.quantity - 1);
+
+                    const quantityText = document.createElement("span");
+                    quantityText.textContent = item.quantity;
+
+                    const increaseBtn = document.createElement("button");
+                    increaseBtn.classList.add("quantity-btn");
+                    increaseBtn.textContent = "+";
+                    increaseBtn.onclick = () => updateQuantity(item.book.id, item.quantity + 1);
+
+                    quantityControls.appendChild(decreaseBtn);
+                    quantityControls.appendChild(quantityText);
+                    quantityControls.appendChild(increaseBtn);
+
+                    // Delete Button
+                    const deleteBtn = document.createElement("button");
+                    deleteBtn.classList.add("delete-btn");
+                    deleteBtn.textContent = "X";
+                    deleteBtn.onclick = () => removeFromCart(item.book.id);
+
+                    li.appendChild(bookTitle);
+                    li.appendChild(quantityControls);
+                    li.appendChild(deleteBtn);
+
+                    cartList.appendChild(li);
+                    totalPrice += item.book.price * item.quantity;
+                });
+
+                document.getElementById("total-price").textContent = `$${totalPrice.toFixed(2)}`;
+            })
+            .catch(error => console.error("Error loading cart:", error));
+        }
+        function updateQuantity(bookId, newQuantity) {
+            if (newQuantity < 1) return removeFromCart(bookId); // If quantity is less than 1, remove item
+
+            const token = localStorage.getItem("token");
+            fetch(`http://localhost:8080/api/cart/${bookId}`, {
+            method: "PUT",
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`
+            },
+            body: JSON.stringify({ quantity: newQuantity })
+            })
+            .then(response => {
+            if (!response.ok) throw new Error("Failed to update cart");
+
+            // After updating the cart, update the displayed quantity directly in the DOM
+            const quantityText = document.querySelector(`li[data-book-id="${bookId}"] span`);
+            quantityText.textContent = newQuantity;
+
+            // Refresh the total price display
+            fetchCartItems();
+            })
+            .catch(error => console.error("Error updating cart:", error));
+        }
+
+        function removeFromCart(bookId) {
+            const token = localStorage.getItem("token");
+            fetch(`http://localhost:8080/api/cart/${bookId}`, {
+                method: "DELETE",
+                headers: { "Authorization": `Bearer ${token}` }
+            })
+            .then(response => {
+                if (!response.ok) throw new Error("Failed to remove item");
+                fetchCartItems(); // Refresh cart
+            })
+            .catch(error => console.error("Error removing item:", error));
+        }
+        async function checkoutCart() {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+        alert("You must be logged in to checkout.");
+        return;
+    }
+
+    try {
+        const response = await fetch("http://localhost:8080/api/cart/checkout", {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            }
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Checkout failed.");
+        }
+
+        alert("Checkout successful! Your order has been placed.");
+        window.location.href = "orders.html"; // Redirect to order summary page
+    } catch (error) {
+        console.error("Error during checkout:", error);
+        alert("Failed to complete checkout. Please try again.");
+    }
+}
+
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,227 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookHub - Explore Books</title>
+    <style>
+        /* General Styling */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f8f9fa;
+            color: #333;
+            text-align: center;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1e1e1e;
+            padding: 10px 0;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            display: inline-block;
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #ff9800;
+            color: white;
+            border-radius: 5px;
+        }
+
+        /* Container */
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        h1 {
+            font-size: 28px;
+            margin-bottom: 20px;
+        }
+
+        /* Book List */
+        .book-list {
+            list-style: none;
+            padding: 0;
+        }
+
+        .book-item {
+            background: #ffffff;
+            margin: 10px 0;
+            padding: 15px;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            transition: 0.3s;
+            text-align: left;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .book-item:hover {
+            background-color: #ff9800;
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .book-info {
+            flex-grow: 1;
+        }
+
+        .book-item span {
+            display: block;
+            font-size: 14px;
+            color: #666;
+        }
+
+        /* Add to Cart Button */
+        .add-to-cart {
+            padding: 8px 15px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease-in-out, transform 0.1s ease-in-out;
+        }
+
+        .add-to-cart:hover {
+            background-color: #e68900;
+            transform: scale(1.05);
+        }
+
+        .added {
+            background-color: #28a745 !important;
+            color: white !important;
+            transform: scale(1.1);
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .container {
+                width: 90%;
+                padding: 20px;
+            }
+
+            .book-item {
+                font-size: 16px;
+                flex-direction: column;
+                align-items: flex-start;
+            }
+
+            .add-to-cart {
+                width: 100%;
+                margin-top: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="book.html">Books</a>
+        <a href="profile.html">Profile</a>
+        <a href="odds.html">Review</a>
+        <a href="cart.html">🛒 Cart</a>
+    </div>
+
+    <!-- Book Container -->
+    <div class="container">
+        <h1>Explore Our Collection 📚</h1>
+        <ul id="book-list" class="book-list"></ul>
+    </div>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            fetch("http://localhost:8080/api/books/trend")
+                .then(response => response.json())
+                .then(books => {
+                    const bookList = document.getElementById("book-list");
+                    
+                    books.forEach(book => {
+                        const li = document.createElement("li");
+                        li.classList.add("book-item");
+
+                        const infoDiv = document.createElement("div");
+                        infoDiv.classList.add("book-info");
+                        infoDiv.innerHTML = `
+                            <strong>${book.title}</strong>
+                            <span>by ${book.author}</span>
+                            <span>Price: $${book.price}</span>
+                        `;
+
+                        const addButton = document.createElement("button");
+                        addButton.classList.add("add-to-cart");
+                        addButton.textContent = "Add to Cart";
+                        addButton.addEventListener("click", function (event) {
+                            event.stopPropagation(); // Prevent redirecting when clicking the button
+                            addToCart(book, addButton);
+                        });
+
+                        // Redirect to book details page
+                        li.addEventListener("click", function () {
+                            window.location.href = `book.html?id=${book.id}`;
+                        });
+
+                        li.appendChild(infoDiv);
+                        li.appendChild(addButton);
+                        bookList.appendChild(li);
+                    });
+                })
+                .catch(error => console.error("Error fetching books:", error));
+        });
+
+        function addToCart(book, button) {
+            const token = localStorage.getItem("token"); // Get JWT Token
+            if (!token) {
+                alert("Please log in first!");
+                return;
+            }
+
+            fetch("http://localhost:8080/api/cart", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({
+                    book_id: book.id,
+                    quantity: 1
+                })
+            })
+            .then(response => response.json())
+            .then(() => {
+                // Change button to show item added
+                button.textContent = "✔ Added";
+                button.classList.add("added");
+                button.disabled = true;
+
+                setTimeout(() => {
+                    button.textContent = "Add to Cart";
+                    button.classList.remove("added");
+                    button.disabled = false;
+                }, 1000); // Reset after 2 seconds
+            })
+            .catch(error => console.error("Error adding to cart:", error));
+        }
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,537 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profile - BookHub</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background-color: #f4f4f4;
+            text-align: center;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1e1e1e;
+            padding: 10px 0;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            display: inline-block;
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #ff9800;
+            color: white;
+            border-radius: 5px;
+        }
+
+        /* Profile Container */
+        .profile-container {
+            max-width: 600px;
+            margin: 40px auto;
+            background: white;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+            text-align: left;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+        }
+
+        .profile-info {
+            font-size: 18px;
+            margin: 10px 0;
+            font-weight: bold;
+        }
+
+        /* Balance Container */
+        .balance-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .balance-amount {
+            font-size: 24px;
+            font-weight: bold;
+            color: #27ae60;
+            margin-bottom: 10px;
+        }
+
+        .topup-form {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .topup-form input {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+            width: 100px;
+        }
+
+        .topup-form button {
+            padding: 10px;
+            background-color: #ff9800;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+            font-weight: bold;
+        }
+
+        .topup-form button:hover {
+            background-color: #e67e00;
+        }
+
+        /* Books & Reviews */
+        .list-container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+            margin-top: 20px;
+        }
+
+        .list-container ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .list-container li {
+            background: #f8f9fa;
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+
+        .list-container li:hover {
+            background-color: #ff9800;
+            color: white;
+            cursor: pointer;
+        }
+
+        /* Activity Log */
+        .activity-log {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 3px 6px rgba(0, 0, 0, 0.15);
+            margin-top: 20px;
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff4d4d;
+            color: white;
+            border: none;
+            font-size: 18px;
+            font-weight: bold;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.3s;
+        }
+
+        .logout-btn:hover {
+            background-color: #e63939;
+        }
+
+        /* Responsive */
+        @media (max-width: 600px) {
+            .profile-container {
+                width: 90%;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="book.html">Books</a>
+        <a href="profile.html">Profile</a>
+        <a href="odds.html">Review</a>
+        <a href="cart.html">🛒 Cart</a>
+    </div>
+
+    <!-- Profile Section -->
+    <div class="profile-container">
+        <h2>Welcome to Your Profile 🎉</h2>
+        <p class="profile-info"><strong>Username:</strong> <span id="profile-username"></span></p>
+        <p class="profile-info"><strong>Email:</strong> <span id="profile-email"></span></p>
+
+        <!-- Balance Section -->
+        <div class="balance-container">
+            <h3>Your Balance</h3>
+            <div class="balance-amount" id="profile-balance">$0.00</div>
+            <div class="topup-form">
+                <input type="number" id="topup-amount" placeholder="Amount" min="0">
+                <button onclick="topUp()">Top Up</button>
+            </div>
+        </div>
+
+        <!-- User Books -->
+        <div class="list-container">
+            <h3>Your Books 📚</h3>
+            <ul id="user-books"><li>Loading books...</li></ul>
+        </div>
+
+        <!-- User Reviews -->
+        <div class="list-container">
+            <h3>Your Reviews ✍️</h3>
+            <ul id="user-reviews"><li>Loading reviews...</li></ul>
+        </div>
+
+        <!-- Activity Log -->
+        <div class="activity-log">
+            <h3>Your Activity Log:</h3>
+            <ul id="user-events">
+                <li>Loading events...</li>
+            </ul>
+            <button id="load-more-events" style="display: none;" onclick="loadMoreEvents()">Show More</button>
+            
+        </div>
+
+        <button class="logout-btn" onclick="logoutUser()">Logout</button>
+    </div>
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+        try {
+            const token = localStorage.getItem("token");
+            const user = JSON.parse(localStorage.getItem("loggedInUser"));
+    
+            if (!token || !user || !user.id) {
+                alert("You must be logged in!");
+                window.location.href = "registration.html"; // Redirect to login
+                return;
+            }
+    
+            // Display user info
+            document.getElementById("profile-username").textContent = user.name;
+            document.getElementById("profile-email").textContent = user.email || "Email not provided";
+        
+            // Fetch user details
+            await fetchUserBooks(user.id, token);
+            await fetchUserReviews(user.id, token);
+            await fetchUserBalance(user.id, token);
+            await fetchUserEvents(token);
+        } catch (error) {
+            console.error("Error:", error);
+        }
+    });
+    
+    //  Fetch User Balance
+    async function fetchUserBalance(userId, token) {
+        try {
+            const response = await fetch(`http://localhost:8080/api/users/${userId}/balance`, {
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+    
+            if (!response.ok) throw new Error("Failed to fetch balance");
+    
+            const data = await response.json();
+            document.getElementById("profile-balance").textContent = `$${data.balance}`;
+        } catch (error) {
+            console.error("Error fetching balance:", error);
+            document.getElementById("profile-balance").textContent = "Error loading balance.";
+        }
+    }
+    
+    // Top Up Balance
+    async function topUp() {
+        const userId = JSON.parse(localStorage.getItem("loggedInUser")).id;
+        const amount = parseFloat(document.getElementById("topup-amount").value);
+    
+        if (isNaN(amount) || amount <= 0) {
+            alert("Please enter a valid amount.");
+            return;
+        }
+    
+        const token = localStorage.getItem("token");
+    
+        try {
+            const response = await fetch(`http://localhost:8080/api/users/${userId}/balance/topup`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${token}`
+                },
+                body: JSON.stringify({ amount })
+            });
+    
+            if (!response.ok) throw new Error("Failed to top up balance");
+    
+            const data = await response.json();
+            alert(data.message);
+            await fetchUserBalance(userId, token);
+            document.getElementById("topup-amount").value = "";
+        } catch (error) {
+            console.error("Error topping up balance:", error);
+            alert("Error topping up balance. Please try again.");
+        }
+    }
+    
+    // Fetch User Books
+    async function fetchUserBooks(userId, token) {
+        try {
+            const response = await fetch(`http://localhost:8080/api/user/books?user_id=${userId}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+    
+            if (!response.ok) throw new Error("Failed to fetch books");
+    
+            const books = await response.json();
+            const bookList = document.getElementById("user-books");
+            bookList.innerHTML = "";
+    
+            if (books.length > 0) {
+                books.forEach(book => {
+                    const li = document.createElement("li");
+                    li.className = "book-item";
+                    li.innerHTML = `
+                    <strong>${book.title}</strong> - ${book.author}
+                    <button class="edit-btn" onclick="editBook(${book.id}, '${book.title}', '${book.author}')">✏️ Edit</button>
+                    <button class="delete-btn" onclick="deleteBook(${book.id})">🗑️ Delete</button>
+                `;
+                bookList.appendChild(li);
+            });
+            } else {
+                bookList.innerHTML = "<li>No books found.</li>";
+            }
+        } catch (error) {
+            console.error("Error fetching books:", error);
+            document.getElementById("user-books").innerHTML = "<li>Error loading books.</li>";
+        }
+    }
+
+    //EDIT BOOK FUNCTION  
+    function editBook(bookId, oldTitle, oldAuthor) {
+        const newTitle = prompt("Enter new title:", oldTitle);
+        const newAuthor = prompt("Enter new author:", oldAuthor);
+
+        if (!newTitle || !newAuthor) return;
+
+        const token = localStorage.getItem("token");
+        fetch(`http://localhost:8080/api/books/${bookId}`, {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ title: newTitle, author: newAuthor })
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Failed to update book");
+            fetchUserBooks(JSON.parse(localStorage.getItem("loggedInUser")).id, token);
+        })
+        .catch(error => console.error("Error editing book:", error));
+    }
+
+    //DELETE BOOK FUNCTION  
+    function deleteBook(bookId) {
+        if (!confirm("Are you sure you want to delete this book?")) return;
+
+        const token = localStorage.getItem("token");
+        fetch(`http://localhost:8080/api/books/${bookId}`, {
+        method: "DELETE",
+        headers: { "Authorization": `Bearer ${token}` }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Failed to delete book");
+            fetchUserBooks(JSON.parse(localStorage.getItem("loggedInUser")).id, token);
+        })
+        .catch(error => console.error("Error deleting book:", error));
+    }
+
+    // Fetch User Reviews
+    async function fetchUserReviews(userId, token) {
+        try {
+            const response = await fetch(`http://localhost:8080/api/user/reviews?user_id=${userId}`, {
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+    
+            if (!response.ok) throw new Error("Failed to fetch reviews");
+    
+            const reviews = await response.json();
+            console.log("API Response:", reviews); // Debugging line
+            const reviewList = document.getElementById("user-reviews");
+            reviewList.innerHTML = "";
+    
+            if (reviews.length > 0) {
+            reviews.forEach(review => {
+                const li = document.createElement("li");
+                li.className = "review-item";
+                li.innerHTML = `
+                    <strong>${review.book_title || "Unknown Book"}</strong>: 
+                    ${review.content || "No review text"} 
+                    <em>(Rating: ${review.rating || "N/A"})</em>
+                    <button class="edit-btn" onclick="editReview(${review.id}, '${review.content}', ${review.rating})">✏️ Edit</button>
+                    <button class="delete-btn" onclick="deleteReview(${review.id})">🗑️ Delete</button>
+                `;
+                reviewList.appendChild(li);
+            });
+            } else {
+                reviewList.innerHTML = "<li>No reviews found.</li>";
+            }
+        } catch (error) {
+            console.error("Error fetching reviews:", error);
+            document.getElementById("user-reviews").innerHTML = "<li>Error loading reviews.</li>";
+        }
+    }
+
+    //EDIT REVIEW FUNCTION
+    function editReview(reviewId, oldText, oldRating) {
+        const newText = prompt("Edit your review:", oldText);
+        let newRating = prompt("Enter new rating (1-5):", oldRating);
+
+        // Convert to number and validate rating range (1-5)
+        newRating = parseInt(newRating, 10);
+        if (!newText || isNaN(newRating) || newRating < 1 || newRating > 5) {
+            alert("Invalid rating! Please enter a number between 1 and 5.");
+            return;
+        }
+
+        const payload = {
+            text: newText,
+            rating: parseInt(newRating, 10),
+        };
+
+        console.log("Updating review with data:", payload);
+
+        const token = localStorage.getItem("token");
+        fetch(`http://localhost:8080/api/user/reviews/${reviewId}`, {
+            method: "PUT",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify(payload)
+        })
+        .then(async (response) => {
+            const result = await response.json();
+            if (!response.ok) {
+                throw new Error(result.error || "Failed to update review");
+            }
+            alert("Review updated successfully!");
+            fetchUserReviews(JSON.parse(localStorage.getItem("loggedInUser")).id, token);
+        })
+        .catch(error => console.error("Error editing review:", error));
+    }
+
+    let allEvents = []; // Stores all events
+    let displayedEvents = 10; // Initially show 10
+
+
+    function deleteReview(reviewId) {
+        if (!confirm("Are you sure you want to delete this review?")) return;
+
+        const token = localStorage.getItem("token");
+        fetch(`http://localhost:8080/api/user/reviews/${reviewId}`, {
+            method: "DELETE",
+            headers: { "Authorization": `Bearer ${token}` }
+        })
+        .then(response => {
+            if (!response.ok) throw new Error("Failed to delete review");
+            fetchUserReviews(JSON.parse(localStorage.getItem("loggedInUser")).id, token);
+        })
+        .catch(error => console.error("Error deleting review:", error));
+    }
+
+    async function fetchUserEvents() {
+        const token = localStorage.getItem("token");
+        if (!token) {
+            alert("Please log in first.");
+            return;
+        }
+
+        try {
+            const response = await fetch("http://localhost:8080/api/user/events", {
+                method: "GET",
+                headers: {
+                    "Authorization": `Bearer ${token}`,
+                    "Content-Type": "application/json"
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error("Failed to fetch events.");
+            }
+
+            allEvents = await response.json();
+            displayUserEvents();
+        } catch (error) {
+            console.error("Error fetching events:", error);
+        }
+    }
+
+    function displayUserEvents() {
+        const eventList = document.getElementById("user-events");
+        eventList.innerHTML = "";
+
+        const eventsToShow = allEvents.slice(0, displayedEvents);
+
+        if (eventsToShow.length === 0) {
+            eventList.innerHTML = "<li>No recent activities.</li>";
+            return;
+        }
+
+        eventsToShow.forEach(event => {
+            const li = document.createElement("li");
+            li.textContent = `${event.timestamp}: ${event.message}`;
+            eventList.appendChild(li);
+        });
+
+        // Show "Load More" button if there are more events to display
+        document.getElementById("load-more-events").style.display = 
+            displayedEvents < allEvents.length ? "block" : "none";
+    }
+
+    function loadMoreEvents() {
+        displayedEvents += 10; // Load 10 more events
+        displayUserEvents();
+    }
+
+    document.addEventListener("DOMContentLoaded", fetchUserEvents);
+    
+    // Logout User
+    function logoutUser() {
+        localStorage.removeItem("token");
+        localStorage.removeItem("loggedInUser");
+        alert("You have been logged out.");
+        window.location.href = "registration.html";
+    }
+    </script>
+</body>
+</html>

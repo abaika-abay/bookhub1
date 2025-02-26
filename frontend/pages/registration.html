@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BookHub - Login & Register</title>
+    <style>
+        /* General Styles */
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            text-align: center;
+            background-color: #f4f4f4;
+        }
+
+        /* Navbar */
+        .navbar {
+            background-color: #1e1e1e;
+            padding: 10px 0;
+            text-align: center;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .navbar a {
+            display: inline-block;
+            color: white;
+            padding: 12px 16px;
+            text-decoration: none;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .navbar a:hover {
+            background-color: #ff9800;
+            color: white;
+            border-radius: 5px;
+        }
+
+        /* Form Container */
+        .form-container {
+            max-width: 400px;
+            background: white;
+            margin: 40px auto;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            text-align: left;
+        }
+
+        .form-container h3 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        .form-container small {
+            display: block;
+            text-align: center;
+            margin-bottom: 15px;
+            color: #666;
+        }
+
+        .input-box {
+            width: 100%;
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 12px;
+            background-color: #ff9800;
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.3s;
+        }
+
+        .btn:hover {
+            background-color: #e68900;
+        }
+
+        .toggle-text {
+            text-align: center;
+            margin-top: 15px;
+        }
+
+        .toggle-text a {
+            color: #ff9800;
+            cursor: pointer;
+            text-decoration: none;
+            font-weight: bold;
+        }
+
+        .toggle-text a:hover {
+            text-decoration: underline;
+        }
+
+        .error {
+            color: red;
+            font-size: 14px;
+            text-align: center;
+            margin-top: 5px;
+        }
+
+        /* Hidden Sections */
+        #register-section {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <div class="navbar">
+        <a href="index.html">Home</a>
+        <a href="book.html">Books</a>
+        <a href="profile.html">Profile</a>
+        <a href="odds.html">Review</a>
+        <a href="cart.html">🛒 Cart</a>
+    </div>
+
+    <!-- Login Section -->
+    <section id="login-section" class="form-container">
+        <h3>Welcome Back!</h3>
+        <small>We are happy to see you again.</small>
+        <input type="email" id="login-email" class="input-box" placeholder="Email" required>
+        <input type="password" id="login-password" class="input-box" placeholder="Password" required>
+        <p class="error" id="login-error"></p>
+        <button class="btn" onclick="loginUser()">Login</button>
+        <p class="toggle-text">Don't have an account? <a onclick="toggleRegister()">Register</a></p>
+    </section>
+
+    <!-- Registration Section -->
+    <section id="register-section" class="form-container" style="display: none;">
+        <h3>Join BookHub!</h3>
+        <small>Become a member today.</small>
+        <input type="text" id="reg-name" class="input-box" placeholder="Name" required>
+        <input type="email" id="reg-email" class="input-box" placeholder="Email" required>
+        <input type="password" id="reg-password" class="input-box" placeholder="Password" required>
+        <p class="error" id="register-error"></p>
+        <button class="btn" onclick="registerUser()">Register</button>
+        <p class="toggle-text">Already have an account? <a onclick="toggleLogin()">Login</a></p>
+    </section>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem("token");
+            if (token) {
+                window.location.href = "profile.html"; // Redirect logged-in users
+            }
+        });
+        
+        // 📌 LOGIN FUNCTION
+        async function loginUser() {
+            const email = document.getElementById("login-email").value.trim(); // Updated ID
+            const password = document.getElementById("login-password").value.trim();
+            const errorMsg = document.getElementById("login-error");
+        
+            errorMsg.textContent = ""; // Clear previous errors
+        
+            if (!email || !password) {
+                errorMsg.textContent = "All fields are required!";
+                return;
+            }
+        
+            try {
+                const response = await fetch("http://localhost:8080/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+        
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Invalid email or password");
+                }
+        
+                const data = await response.json();
+                localStorage.setItem("token", data.token);
+                localStorage.setItem("loggedInUser", JSON.stringify(data.user));
+        
+                alert("Login successful!");
+                window.location.href = "profile.html"; // Redirect user to profile
+            } catch (error) {
+                console.error("Login error:", error);
+                errorMsg.textContent = error.message;
+            }
+        }
+        
+        // 📌 REGISTER FUNCTION
+        async function registerUser() {
+            const name = document.getElementById("reg-name").value.trim();
+            const email = document.getElementById("reg-email").value.trim();
+            const password = document.getElementById("reg-password").value.trim();
+            const errorMsg = document.getElementById("register-error");
+        
+            errorMsg.textContent = ""; // Clear previous errors
+        
+            if (!name || !email || !password) {
+                errorMsg.textContent = "All fields are required!";
+                return;
+            }
+        
+            try {
+                const response = await fetch("http://localhost:8080/api/auth/register", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ name, email, password })
+                });
+        
+                if (!response.ok) {
+                    const errorData = await response.json();
+                    throw new Error(errorData.error || "Registration failed");
+                }
+        
+                alert("Registration successful! Please log in.");
+                toggleLogin(); // Switch to login view
+            } catch (error) {
+                console.error("Registration error:", error);
+                errorMsg.textContent = error.message;
+            }
+        }
+        
+        // 📌 SWITCH BETWEEN LOGIN & REGISTER
+        function toggleRegister() {
+            document.getElementById("login-section").style.display = "none";
+            document.getElementById("register-section").style.display = "block";
+        }
+        
+        function toggleLogin() {
+            document.getElementById("register-section").style.display = "none";
+            document.getElementById("login-section").style.display = "block";
+        }
+        </script>
+        
+</body>
+</html>

@@ -1,0 +1,58 @@
+{
+  "name": "bookhub",
+  "version": "1.0.0",
+  "main": "index.js",
+  "dependencies": {
+    "asynckit": "^0.4.0",
+    "axios": "^1.7.9",
+    "caniuse-lite": "^1.0.30001696",
+    "combined-stream": "^1.0.8",
+    "cookie": "^0.7.2",
+    "delayed-stream": "^1.0.0",
+    "follow-redirects": "^1.15.9",
+    "form-data": "^4.0.1",
+    "jose": "^4.15.9",
+    "js-tokens": "^4.0.0",
+    "loose-envify": "^1.4.0",
+    "lru-cache": "^6.0.0",
+    "mime-db": "^1.52.0",
+    "mime-types": "^2.1.35",
+    "nanoid": "^3.3.8",
+    "next": "^15.1.6",
+    "next-auth": "^4.24.11",
+    "oauth": "^0.9.15",
+    "object-hash": "^2.2.0",
+    "oidc-token-hash": "^5.0.3",
+    "openid-client": "^5.7.1",
+    "picocolors": "^1.1.1",
+    "postcss": "^8.4.14",
+    "preact": "^10.25.4",
+    "preact-render-to-string": "^5.2.6",
+    "pretty-format": "^3.8.0",
+    "proxy-from-env": "^1.1.0",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "regenerator-runtime": "^0.14.1",
+    "scheduler": "^0.23.2",
+    "source-map-js": "^1.2.1",
+    "styled-jsx": "^5.0.7",
+    "tslib": "^2.8.1",
+    "use-sync-external-store": "^1.2.0",
+    "uuid": "^8.3.2",
+    "yallist": "^4.0.0"
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/trippingcoin/BookHub.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/trippingcoin/BookHub/issues"
+  },
+  "homepage": "https://github.com/trippingcoin/BookHub#readme",
+  "description": ""
+}
